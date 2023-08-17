@@ -1,5 +1,5 @@
 from django.contrib import admin
-from inventory.models import Category, Sub_Category, Attachment, Image, Product
+from inventory.models import Category, Sub_Category, Attachment, Clothe
 
 
 # class ProductAdmin(admin.ModelAdmin):
@@ -11,5 +11,5 @@ from inventory.models import Category, Sub_Category, Attachment, Image, Product
 
 admin.site.register(Category)
 admin.site.register(Sub_Category)
-admin.site.register(Image)
+admin.site.register(Clothe)
 admin.site.register(Attachment)

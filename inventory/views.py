@@ -6,8 +6,8 @@
 # from inventory.serializers import CategotySerializer, Sub_CategorySerializer
 
 from rest_framework import generics
-from .models import Category, Sub_Category
-from .serializers import CategotySerializer, Sub_CategorySerializer
+from .models import Category, Sub_Category, Clothe, Attachment
+from .serializers import CategotySerializer, Sub_CategorySerializer, ClothesDetailsSerializer
 
 class CategoryListCreateView(generics.ListCreateAPIView):
     queryset = Category.objects.all()
@@ -55,59 +55,15 @@ class SubCategoryRetrieveUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView)
 #         category.delete()
 #         return JsonResponse("Deleted Successfully",safe=False)
 
-from django.shortcuts import render, redirect
-from .models import Image, Attachment
-
-def upload_images(request):
-    if request.method == 'POST':
-        image_names = request.POST.getlist('image_name[]')
-        image_originals = request.FILES.getlist('image_originals[]')
-        image_clothes = request.FILES.getlist('image_clothes[]')
-        image_masks = request.FILES.getlist('image_masks[]')
-
-        for name, orig, clothes, mask in zip(image_names, image_originals, image_clothes, image_masks):
-            image = Image(
-                image_name=name,
-                image_originals=orig,
-                image_clothes=clothes,
-                image_masks=mask
-            )
-            image.save()
-
-        return redirect('output')
-
-    return render(request, 'upload.html')
-
-def output(request):
-    images = Image.objects.all()
-    context = {'images': images}
-    return render(request, 'output.html', context)
-
-
-from django.shortcuts import render, redirect
-from .forms import ImageForm
-
-def upload_images(request):
-    if request.method == 'POST':
-        form = ImageForm(request.POST, request.FILES)
-        if form.is_valid():
-            form.save()
-            return redirect('success_url')  # Redirect to a success page
-    else:
-        form = ImageForm()
-    
-    context = {'form': form}
-    return render(request, 'upload.html', context)
-
 
 from django.views.generic.edit import FormView
 from rest_framework.generics import ListAPIView
-from .forms import UploadForm
-from .models import Product
+from .forms import ClothesForm
+
 
 class UploadView(FormView):
     template_name = 'upload.html'
-    form_class = UploadForm
+    form_class = ClothesForm
     success_url = '/output/'
 
     def form_valid(self, form):
@@ -116,34 +72,51 @@ class UploadView(FormView):
         files2 = form.cleaned_data['file2']
 
         for idx in range(min(len(attachments), len(files1), len(files2))):
-            attachment = Attachment.objects.create(
-                file=attachments[idx],
-                file1=files1[idx] if idx < len(files1) else None,
-                file2=files2[idx] if idx < len(files2) else None,
+            attachment = Clothe.objects.create(
+                clothes_orginal=attachments[idx],
+                clothes=files1[idx] if idx < len(files1) else None,
+                clothes_mask=files2[idx] if idx < len(files2) else None,
             )
 
         return super(UploadView, self).form_valid(form)
     
-    # def form_valid(self, form):
-    #     attachments = form.cleaned_data['attachments']
-    #     files1 = form.cleaned_data['file1']
-    #     files2 = form.cleaned_data['file2']
 
-    #     for each in attachments:
-    #         attachment = Attachment.objects.create(file=each)
-
-    #     for file1 in files1:
-    #         Attachment.objects.create(file1=file1)
-
-    #     for file2 in files2:
-    #         Attachment.objects.create(file2=file2)
-
-    #     return super(UploadView, self).form_valid(form)
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from inventory.serializers import AttachmentSerializer, AttachmentsSerializer
+from rest_framework.generics import RetrieveUpdateDestroyAPIView
+from inventory.serializers import AttachmentSerializer, AttachmentsSerializer, ClothesSerializer
+
+class ClothesViewAPI(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = ClothesSerializer(data=request.data)
+
+        if serializer.is_valid():
+            attachments = serializer.validated_data['attachments']
+            files1 = serializer.validated_data.get('file1', [])
+            files2 = serializer.validated_data.get('file2', [])
+
+            for idx in range(min(len(attachments), len(files1), len(files2))):
+                Clothe.objects.create(
+                    clothes_orginal=attachments[idx],
+                    clothes=files1[idx] if idx < len(files1) else None,
+                    clothes_mask=files2[idx] if idx < len(files2) else None,
+                )
+
+            return Response({'message': 'Files uploaded successfully.'}, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ClothesDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Clothe.objects.all()
+    serializer_class = ClothesDetailsSerializer
+
+class ClothesListView(ListAPIView):
+    queryset = Clothe.objects.all()
+    serializer_class = ClothesDetailsSerializer
+
 
 class UploadViewAPI(APIView):
     def post(self, request, *args, **kwargs):

@@ -62,7 +62,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'djongo',
         'ENFORCE_SCHEMA': False,
-        'NAME': 'inventory',  # MongoDB database name
+        'NAME': 'ainovoq',  # MongoDB database name
     }
 }
 
