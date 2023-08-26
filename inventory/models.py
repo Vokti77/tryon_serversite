@@ -10,6 +10,7 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
+
 class Sub_Category(models.Model):
     name = models.CharField(max_length=50, unique=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)  # Use ForeignKey
@@ -21,24 +22,9 @@ class Sub_Category(models.Model):
     
 
         
-
-class Attachment(models.Model):
-    image_name = models.CharField(max_length=100, blank=True)
-    file = models.FileField(upload_to='attachments')
-    file1 = models.FileField(upload_to='attachments1', default='')
-    file2 = models.FileField(upload_to='attachments2', default='')
-
-    def save(self, *args, **kwargs):
-        if not self.image_name:  
-            base_name = os.path.basename(self.file.name)
-            name, extension = os.path.splitext(base_name)
-            self.image_name = name
-        super(Attachment, self).save(*args, **kwargs)
-        
-
 class Clothe(models.Model):
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    sub_category = models.ForeignKey(Sub_Category, on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, default=None)
+    sub_category = models.ForeignKey(Sub_Category, on_delete=models.CASCADE, default=None)
     clothe_name = models.CharField(max_length=50, blank=True)
 
     SLEEVE_CHOICES = [
@@ -77,3 +63,6 @@ class Clothe(models.Model):
 
     def __str__(self):
         return self.clothe_name
+    
+
+

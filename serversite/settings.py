@@ -57,14 +57,20 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'serversite.wsgi.application'
 
-
 DATABASES = {
     'default': {
-        'ENGINE': 'djongo',
-        'ENFORCE_SCHEMA': False,
-        'NAME': 'ainovoq',  # MongoDB database name
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'db.sqlite3',
     }
-}
+}  
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'djongo',
+#         'ENFORCE_SCHEMA': False,
+#         'NAME': 'ainovoq',  # MongoDB database name
+#     }
+# }
 
 
 
@@ -105,3 +111,5 @@ STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
